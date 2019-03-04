@@ -873,6 +873,9 @@ jobs:
       WITH_COVERAGE: 1
     steps:
       - install-dependencies
+      - run:
+          name: Install doxygen
+          command: apt update && apt install -y doxygen
       - build-linux
       - save-dependencies
       - run-unit-tests
