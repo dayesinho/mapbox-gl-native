@@ -63,7 +63,8 @@ def parse_file(fullpath):
 	for definition in tree.findall("./compounddef//memberdef"):
 		# Should it be documented
 		if (definition.get('kind') == 'function' and
-			definition.get('static') == 'yes'):
+			(definition.get('static') == 'yes' or
+			 definition.get('prot') == 'private')):
 			continue
 
 		# Is the definition documented?
@@ -157,18 +158,20 @@ def report (files, exclude_dirs):
 		total_yes += doc_yes
 		total_no  += doc_no
 
-		print ('%3d%% - %s - (%d of %d)'%(doc_per, f, doc_yes, (doc_yes + doc_no)))
+		if not ns.total_only:
+			print ('%3d%% - %s - (%d of %d)'%(doc_per, f, doc_yes, (doc_yes + doc_no)))
 
-		defs_sorted = defs.keys()
-		defs_sorted.sort()
-		for d in defs_sorted:
-			if not defs[d]:
-				print ("\t", d)
+			defs_sorted = defs.keys()
+			defs_sorted.sort()
+			for d in defs_sorted:
+				if not defs[d]:
+					print ("\t", d)
 
 	total_all = total_yes + total_no
 	total_per = total_yes * 100 / total_all
-	print()
-	print("%d%% API documentation coverage" %(total_per))
+	if not ns.total_only:
+		print()
+	print("%d%% API documentation coverage (%d out of %d)" %(total_per, total_yes, total_all))
 	return (ns.threshold - total_per, 0)[total_per > ns.threshold]
 
 
@@ -178,6 +181,7 @@ def main():
 	parser.add_argument ("dir",         action="store",      help="Path to Doxygen's XML doc directory")
 	parser.add_argument ("--noerror",   action="store_true", help="Do not return error code after execution")
 	parser.add_argument ("--threshold", action="store",      help="Min acceptable coverage percentage (Default: %s)"%(ACCEPTABLE_COVERAGE), default=ACCEPTABLE_COVERAGE, type=int)
+	parser.add_argument ("--total-only", action="store_true", help="Report only the total coverage percentage")
 	parser.add_argument("--excludedirs", nargs='+', help="List of directories to be excluded from coverage analysis", type=str, default=[])
 
 
