@@ -878,7 +878,6 @@ jobs:
           command: apt update && apt install -y doxygen
       - build-linux
       - save-dependencies
-      - run-unit-tests
       - run:
           name: Check documentation coverage
           command: |
