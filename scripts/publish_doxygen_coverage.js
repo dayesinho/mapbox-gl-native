@@ -2,13 +2,12 @@
 
 const jwt = require('jsonwebtoken');
 const github = require('@octokit/rest')();
-const zlib = require('zlib');
-const AWS = require('aws-sdk');
+const fs = require('fs');
 
 const SIZE_CHECK_APP_ID = 14028;
 const SIZE_CHECK_APP_INSTALLATION_ID = 229425;
 
-const coverage = JSON.parse(fs.readFileSync(argv[2]));
+const coverage = JSON.parse(fs.readFileSync(process.argv[2]));
 
 process.on('unhandledRejection', error => {
     console.log(error);
@@ -35,6 +34,7 @@ github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATIO
     .then(({data}) => {
         github.authenticate({type: 'token', token: data.token});
         const percentage = coverage.documented * 100 / coverage.total;
+        const title = `${percentage}%`;
 
         return github.checks.create({
             owner: 'mapbox',
@@ -46,8 +46,8 @@ github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATIO
             conclusion: 'success',
             completed_at: new Date().toISOString(),
             output: {
-                `${percentage}%`,
-                summary: `There are doxygen documentation for ${percentage}% of the public symbols`
+                title,
+                summary: `There is doxygen documentation for ${percentage}% of the public symbols (${coverage.documented} out of ${coverage.total})`
             }
         });
     });
