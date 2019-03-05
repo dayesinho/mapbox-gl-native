@@ -882,9 +882,7 @@ jobs:
       - run:
           name: Check documentation coverage
           command: |
-              pushd "build/linux-$(uname -m)/Debug"
-              ninja doxygen_coverage
-              popd
+              platform/linux/ninja -C "build/linux-$(uname -m)/Debug" doxygen_coverage
               scripts/publish_doxygen_coverage.js "build/linux-$(uname -m)/Debug/doxygen-coverage.json"
 
 # ------------------------------------------------------------------------------
