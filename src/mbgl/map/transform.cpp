@@ -435,28 +435,25 @@ ViewportMode Transform::getViewportMode() const {
 
 #pragma mark - Projection mode
 
-void Transform::setAxonometric(bool axonometric) {
-    state.axonometric = axonometric;
+void Transform::setProjectionMode(const ProjectionMode& options) {
+    if (options.axonometric) {
+        state.axonometric = *options.axonometric;
+    }
+
+    if (options.xSkew) {
+        state.xSkew = *options.xSkew;
+    }
+
+    if (options.ySkew) {
+        state.ySkew = *options.ySkew;
+    }
 }
 
-bool Transform::getAxonometric() const {
-    return state.axonometric;
-}
-
-void Transform::setXSkew(double xSkew) {
-    state.xSkew = xSkew;
-}
-
-double Transform::getXSkew() const {
-    return state.xSkew;
-}
-
-void Transform::setYSkew(double ySkew) {
-    state.ySkew = ySkew;
-}
-
-double Transform::getYSkew() const {
-    return state.ySkew;
+ProjectionMode Transform::getProjectionMode() const {
+    return ProjectionMode()
+        .withAxonometric(state.axonometric)
+        .withXSkew(state.xSkew)
+        .withYSkew(state.ySkew);
 }
 
 #pragma mark - Transition
