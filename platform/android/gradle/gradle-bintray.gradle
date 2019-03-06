@@ -1,5 +1,4 @@
 apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 apply from: file('../gradle/artifact-settings.gradle')
 
@@ -25,7 +24,7 @@ install {
             packaging 'aar'
             groupId project.ext.mapboxArtifactGroupId
             artifactId project.ext.mapboxArtifactId
-            version VERSION_NAME
+            version project.ext.versionName
             println 'version = ' + version
 
             scm {
@@ -54,13 +53,32 @@ publishing {
     publications {
         MapboxMapsSdkPublication(MavenPublication) {
 
+            artifact("$buildDir/outputs/aar/mapbox-android-sdk-release.aar")
+
+            // TODO: Uncomment these and use exisiting Gradle tasks in `gradle-publish.gradle` ?
+            // TODO: https://github.com/search?q=%22artifact%28sourcesJar%29+++++++++++++artifact%28javadocJar%29%22&type=Code
+            /*artifact(sourcesJar)
+            artifact(javadocJar)
+*/
+            // For some reason, uncommented the following 3 declarations throws an error:
+            /*
+            groupId 'com.mapbox.mapboxsdk'
+            artifactId = 'mapbox-android-sdk'
+            version project.ext.versionName
+            */
+
             pom.withXml {
-                // Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.compile.allDependencies.each {
-                    def dependencyNode = dependenciesNode.appendNode('dependency')
-                    dependencyNode.appendNode('groupId', it.group)
-                    dependencyNode.appendNode('artifactId', it.name)
-                    dependencyNode.appendNode('version', it.version)
+                def dependenciesNode = asNode().getAt('dependencies')[0] ?: asNode().appendNode('dependencies')
+
+                // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.implementation.allDependencies.each {
+                    // Ensure dependencies such as fileTree are not included.
+                    if (it.name != 'unspecified') {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
                 }
             }
         }
@@ -68,6 +86,7 @@ publishing {
 }
 
 bintray {
+
     user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
 
     key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
@@ -87,13 +106,13 @@ bintray {
         licenses = [project.ext.mapboxLicenseName]
         vcsUrl = project.ext.mapboxArtifactVcsUrl
         version {
-            name = VERSION_NAME
+            name = project.ext.versionName
             desc = 'Mapbox Maps SDK for Android'
             released = new Date()
             println 'version released = ' + released
 
             gpg {
-                sign = false
+                sign = true
                 passphrase = project.hasProperty('gpgPassphrase') ? project.property('gpgPassphrase') : System.getenv('GPG_PASSPHRASE')
             }
             mavenCentralSync {

@@ -9,16 +9,10 @@ ext {
     mapboxLicenseName = 'BSD'
     mapboxLicenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
     mapboxArtifactInceptionYear = '2014'
-
-//    versionCode = project.hasProperty('versionCode') ? project.property('versionCode') : 0
-    versionCode = rootProject.hasProperty('versionCode') ? project.property('versionCode') : System.getenv('VERSION_CODE')
-
-//    versionName = project.hasProperty('versionName') ? project.property('versionName') : '0.0.0'
-    versionName = rootProject.hasProperty('versionName') ? project.property('versionName') : System.getenv('VERSION_NAME')
+    versionName = project.hasProperty('versionName') ? project.property('versionName') : System.getenv('VERSION_NAME')
 
     mapboxBintrayUserOrg = 'mapbox'
     mapboxBintrayRepoName = 'mapbox'
-    mapboxBintrayPackageName = 'mapbox-android-sdk'
 
     // mapboxBintrayArtifactId is the same as mapboxArtifactGroup because of a weird bug
     // https://github.com/bintray/gradle-bintray-plugin/issues/88
